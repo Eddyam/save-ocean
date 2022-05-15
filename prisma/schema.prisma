@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model brigada {
+  id                    Int                     @id @default(autoincrement())
+  nombre                String?                 @db.VarChar(255)
+  participantes         Int?
+  actividades           String?                 @db.VarChar(255)
+  id_usuario            Int?
+  id_evento             Int?
+  evento                evento?                 @relation(fields: [id_evento], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_participa_en_evento")
+  usuario               usuario?                @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_responsable_brigada")
+  brigadas_evento       brigadas_evento[]
+  participantes_brigada participantes_brigada[]
+}
+
+model brigadas_evento {
+  id         Int      @id @default(autoincrement())
+  id_evento  Int?
+  id_brigada Int?
+  brigada    brigada? @relation(fields: [id_brigada], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_brigadas_participantes")
+  evento     evento?  @relation(fields: [id_evento], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_evento")
+}
+
+model evento {
+  id              Int               @id @default(autoincrement())
+  nombre          String?           @db.VarChar(255)
+  fecha           DateTime?         @db.Date
+  hora            DateTime?         @db.Time(6)
+  lugar           String?           @db.VarChar(255)
+  status          String?           @db.VarChar(255)
+  id_usuario      Int?
+  usuario         usuario?          @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_coordinador_evento")
+  brigada         brigada[]
+  brigadas_evento brigadas_evento[]
+  reporteevento   reporteevento[]
+}
+
+model insignias {
+  id                Int                 @id @default(autoincrement())
+  nombre            String?             @db.VarChar(255)
+  imagen            String?             @db.VarChar(255)
+  valor             Int?
+  insignias_usuario insignias_usuario[]
+}
+
+model insignias_usuario {
+  id          Int        @id @default(autoincrement())
+  id_usuario  Int?
+  id_insignia Int?
+  insignias   insignias? @relation(fields: [id_insignia], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_insignias_usuario")
+  usuario     usuario?   @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario")
+}
+
+model participantes_brigada {
+  id         Int      @id @default(autoincrement())
+  id_brigada Int?
+  id_usuario Int?
+  brigada    brigada? @relation(fields: [id_brigada], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_brigada")
+  usuario    usuario? @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuario_en_brigada")
+}
+
+model reporteevento {
+  id             Int       @id @default(autoincrement())
+  hora_inicio    DateTime? @db.Time(6)
+  hora_fin       DateTime? @db.Time(6)
+  comentarios    String?   @db.VarChar(255)
+  imagen_antes   String?   @db.VarChar(255)
+  imagen_despues String?   @db.VarChar(255)
+  id_evento      Int?
+  evento         evento?   @relation(fields: [id_evento], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_evento")
+}
+
+model usuario {
+  id                    Int                     @id @default(autoincrement())
+  nombre                String                  @db.VarChar(255)
+  username              String?                 @db.VarChar(255)
+  celular               Int?
+  correo                String?                 @db.VarChar(255)
+  direccion             String?                 @db.VarChar(255)
+  contrasena            String?                 @db.VarChar(255)
+  imagen                String?                 @db.VarChar(255)
+  brigada               brigada[]
+  evento                evento[]
+  insignias_usuario     insignias_usuario[]
+  participantes_brigada participantes_brigada[]
+}
